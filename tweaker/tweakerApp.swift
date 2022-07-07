@@ -11,7 +11,16 @@ import SwiftUI
 struct tweakerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabView {
+                TweakView()
+                    .tabItem {
+                        Label("Tweaks", systemImage: "newspaper.fill")
+                }
+                RepoView()
+                    .tabItem {
+                        Label("Repos", systemImage: "globe.europe.africa.fill")
+                }
+            }
         }
     }
 }
