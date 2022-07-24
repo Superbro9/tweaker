@@ -12,57 +12,71 @@ struct TweakView: View {
     
     @State private var results = [TweakData]()
     @State private var searchTweakText = ""
+    @State private var loadDataCompleted = false
     
     var body: some View {
         NavigationView {
-            List(results, id: \.identifier) { item in
-                
-                NavigationLink {
-                    TweakDetailView(tweakIdentifier: item.identifier ?? "", tweakName: item.name ?? "", tweakDepiction: item.depiction ?? "")
-                } label: {
-                    HStack {
-                        AsyncImage(url: URL(string: item.packageIcon ?? "")) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(width: 44, height: 44)
-                        .clipShape(Rectangle())
-                        .cornerRadius(5)
-                        VStack(alignment: .leading) {
-                            Text(item.name ?? "No name found")
-                                .font(.headline)
-                            Spacer()
-                            Text(item.datumDescription ?? "No name found")
-                                .font(.caption)
-                        }
-                        Spacer()
-                    }
-                }
-                .swipeActions {
-                    Button {
-                        UIPasteboard.general.items = []
-                        UIPasteboard.general.string = item.repository.uri ?? "URL not found"
+            if loadDataCompleted == false {
+                Text("")
+                    .searchable(text: $searchTweakText, prompt: "Search for a tweak")
+                    .navigationTitle("Tweak Search")
+            } else {
+                List(results, id: \.identifier) { item in
+                    
+                    NavigationLink {
+                        TweakDetailView(tweakIdentifier: item.identifier ?? "", tweakName: item.name ?? "", tweakDepiction: item.depiction ?? "")
                     } label: {
-                       Label("Copy URL", systemImage: "doc.on.clipboard.fill")
+                        HStack {
+                            AsyncImage(url: URL(string: item.packageIcon ?? "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 44, height: 44)
+                            .clipShape(Rectangle())
+                            .cornerRadius(5)
+                            VStack(alignment: .leading) {
+                                Text(item.name ?? "No name found")
+                                    .font(.headline)
+                                Spacer()
+                                Text(item.datumDescription ?? "No name found")
+                                    .font(.caption)
+                            }
+                            Spacer()
+                        }
                     }
+                    .swipeActions {
+                        Button {
+                            UIPasteboard.general.items = []
+                            UIPasteboard.general.string = item.repository.uri ?? "URL not found"
+                            simpleSuccess()
+                        } label: {
+                           Label("", systemImage: "doc.on.clipboard.fill")
+                        }
 
+                    }
                 }
+                .searchable(text: $searchTweakText, prompt: "Search for a tweak")
+                .navigationTitle("Tweak Search")
             }
-            .searchable(text: $searchTweakText, prompt: "Search for a tweak")
-            .navigationTitle("Tweak Search")
+            
         }
         .listStyle(.insetGrouped)
         .onSubmit(of: .search) {
             Task {
-                await loadData()
+                await fetchTweakData()
             }
         }
     }
     
-    func loadData() async {
+    func simpleSuccess() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+    }
+    
+    func fetchTweakData() async {
         guard let url = URL(string: "https://api.canister.me/v1/community/packages/search?query=\(searchTweakText)") else {
             print("Invalid URL")
             return
@@ -78,8 +92,10 @@ struct TweakView: View {
             
             //let responseString = String(data: data, encoding: .utf8) ?? "Can’t convert"
             //print(responseString)
+            loadDataCompleted = true
         } catch {
             print(error)
+            loadDataCompleted = false
         }
     }
 }

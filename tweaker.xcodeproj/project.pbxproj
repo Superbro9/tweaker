@@ -110,6 +110,8 @@
 			dependencies = (
 			);
 			name = tweaker;
+			packageProductDependencies = (
+			);
 			productName = tweaker;
 			productReference = 89407F972875DE790052C3D6 /* tweaker.app */;
 			productType = "com.apple.product-type.application";
@@ -138,6 +140,8 @@
 				Base,
 			);
 			mainGroup = 89407F8E2875DE790052C3D6;
+			packageReferences = (
+			);
 			productRefGroup = 89407F982875DE790052C3D6 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";

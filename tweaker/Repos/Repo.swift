@@ -43,6 +43,7 @@ struct RepoView: View {
                     Button {
                         UIPasteboard.general.items = []
                         UIPasteboard.general.string = item.uri ?? "URL not found"
+                        simpleSuccess()
                     } label: {
                        Label("Copy URL", systemImage: "doc.on.clipboard.fill")
                     }
@@ -54,7 +55,7 @@ struct RepoView: View {
         .listStyle(.insetGrouped)
         .onSubmit(of: .search) {
             Task {
-                await loadData()
+                await fetchRepoData()
             }
         }
         .task {
@@ -62,7 +63,12 @@ struct RepoView: View {
         }
     }
     
-    func loadData() async {
+    func simpleSuccess() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+    }
+    
+    func fetchRepoData() async {
         guard let url = URL(string: "https://api.canister.me/v1/community/repositories/search?query=\(searchRepoText)") else {
             print("Invalid URL")
             return
